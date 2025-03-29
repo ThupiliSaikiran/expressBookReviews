@@ -8,7 +8,7 @@ const public_users = express.Router();
 public_users.post("/register", (req,res) => {
     const { username, password } = req.body;
 
-    // Check if username and password are provided
+    // Check if username and password are provided here
     if (!username || !password) {
         return res.status(400).json({ message: "Username and password are required." });
     }

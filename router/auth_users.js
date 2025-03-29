@@ -72,11 +72,34 @@ regd_users.delete("/auth/review/:isbn", (req, res) => {
     const { isbn } = req.params;
     const token = req.headers.authorization;
 
-    // Check if the user is authenticated
+    // Check if the user is authenticated here
     if (!token) {
         return res.status(401).json({ message: "Access denied. No token provided." });
     }
-    
+    try {
+        // Verify token
+        const decoded = jwt.verify(token, "your_secret_key");
+        const username = decoded.username;
+
+        // Ensure the book exists
+        if (!books[isbn]) {
+            return res.status(404).json({ message: "Book not found." });
+        }
+
+        // Ensure the book has reviews
+        if (!books[isbn].reviews || !books[isbn].reviews[username]) {
+            return res.status(404).json({ message: "No review found for this book under your account." });
+        }
+
+        // Delete the user's review
+        delete books[isbn].reviews[username];
+
+        return res.status(200).json({ message: "Review deleted successfully!", reviews: books[isbn].reviews });
+    } catch (error) {
+        return res.status(401).json({ message: "Invalid token." });
+    }
+});
+
 
 module.exports.authenticated = regd_users;
 module.exports.isValid = isValid;
